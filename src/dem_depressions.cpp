@@ -2,6 +2,8 @@
 //Based on source code in RichDEM (Barnes, Richard. 2016. RichDEM: Terrain Analysis Software. http://github.com/r-barnes/richdem)
 //Modified to Rcpp by Kenneth Thorø Martinsen
 
+// DEM filling with low epsilon constant?
+
 #include <Rcpp.h>
 //#include <vector>
 #include <queue>
@@ -41,6 +43,7 @@ const int dy[9] =     {0,  0, -1, -1, -1, 0, 1, 1,  1}; ///< y offsets of D8 nei
 // Constants used in functions
 int labels_nodata = 0;
 double dem_nodata = -9999.0;
+int flowdir_nodata = 0;
 double pittop = dem_nodata;
 int false_pit_cells = 0;
 int clabel = 1;
@@ -270,4 +273,138 @@ List pf_watersheds_barnes2014(NumericMatrix dem){
   
   return(result);
   
+}
+
+static int d8_flowdir(NumericMatrix dem, const int r, const int c){
+  
+  // Helper function for determining d8 flow directions (RichDEM)
+  
+  double minimum_elevation = dem(r, c);
+  int flowdir = 0;
+  
+  // Flow direction for edge cells
+  if (r==0 || c==0 || c == dem.ncol()-1 || r == dem.nrow()-1){
+    if(r==0 && c==0)
+      return 2;
+    else if(r == dem.nrow()-1 && c == 0)
+      return 8;
+    else if(r == 0 && c == dem.ncol()-1)
+      return 4;
+    else if(r == dem.nrow()-1 && c == dem.ncol()-1)
+      return 6;
+    else if(c == 0)
+      return 1;
+    else if(c == dem.ncol()-1)
+      return 5;
+    else if(r == 0)
+      return 3;
+    else if(r == dem.nrow()-1)
+      return 7;
+  }
+  
+  // Flow direction for all other cells
+  for(int n=1; n<=8; n++){
+    if(dem(r+dy[n], c+dx[n]) < minimum_elevation || (dem(r+dy[n], c+dx[n]) == minimum_elevation && flowdir>0 && flowdir%2==0 && n%2==1)){
+      minimum_elevation = dem(r+dy[n], c+dx[n]);
+      flowdir = n;
+    }
+  }
+  
+  return flowdir;
+  
+}
+
+// [[Rcpp::export]]
+IntegerMatrix d8_flow_directions(NumericMatrix dem){
+  
+  // Function for determining d8 flow directions (RichDEM)
+  
+  IntegerMatrix flowdirs(dem.nrow(), dem.ncol());
+
+  //#pragma omp parallel for
+  //see https://mfasiolo.github.io/sc2-2019/rcpp_advanced_iii/2_rcppparallel/
+  for(int r=0; r < dem.nrow(); r++){
+    for(int c=0; c < dem.ncol(); c++)
+      if(dem(r, c) == dem_nodata)
+        flowdirs(r, c) = flowdir_nodata;
+      else
+        flowdirs(r, c) = d8_flowdir(dem, r, c);
+  }
+  
+  return flowdirs;
+}
+
+
+// [[Rcpp::export]]
+NumericMatrix d8_flow_accum(IntegerMatrix flowdirs){
+  
+  // Function for determining d8 flow accumulation (RichDEM)
+  
+  std::queue<cell> sources;
+  
+  NumericMatrix dependency(flowdirs.nrow(), flowdirs.ncol());
+  NumericMatrix area(flowdirs.nrow(), flowdirs.ncol());
+  double area_nodata = -1;
+  
+  //#pragma omp parallel for
+  for(int r=0; r<flowdirs.nrow(); r++){
+    for(int c = 0; c<flowdirs.ncol(); c++){
+      if(flowdirs(r, c) == flowdir_nodata){
+        area(r,c) = area_nodata;
+        continue;
+      }
+      
+      int n = flowdirs(r,c); 
+      if(n == flowdir_nodata) //check if correct (NOFLOW)
+        continue;
+      
+      int nc = c+dx[n];
+      int nr = r+dy[n];
+      
+      if(!(0<=nc && nc<flowdirs.ncol() && 0<=nr && nr<flowdirs.nrow()))
+        continue;
+      
+      ++dependency(nr,nc);
+    }
+  }
+
+  for(int r=0; r<flowdirs.nrow(); r++){
+    for(int c = 0; c<flowdirs.ncol(); c++){
+      if(dependency(r,c) == 0 && flowdirs(r, c) != flowdir_nodata)
+        sources.emplace(cell(r, c));
+    }
+  }
+      
+  long int ccount=0;
+  while(sources.size()>0){
+    cell c = sources.front();
+    sources.pop();
+    
+    ccount++;
+
+    area(c.r,c.c)++;
+    
+    int n = flowdirs(c.r,c.c);
+    
+    if(n == flowdir_nodata)
+      continue;
+    
+    int nc = c.c+dx[n];
+    int nr = c.r+dy[n];
+    
+    if(!(0<=nc && nc<flowdirs.ncol() && 0<=nr && nr<flowdirs.nrow()))
+      continue;
+    
+    if(flowdirs(nr, nc) == flowdir_nodata)
+      continue;
+    
+    area(nr,nc) += area(c.r,c.c);
+    --dependency(nr,nc);
+        
+    if(dependency(nr,nc) == 0)
+      sources.emplace(cell(nr, nc));
+  }
+
+  return area;
+
 }

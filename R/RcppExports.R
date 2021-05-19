@@ -13,3 +13,11 @@ pf_watersheds_barnes2014 <- function(dem) {
     .Call(`_flowdem_pf_watersheds_barnes2014`, dem)
 }
 
+d8_flow_directions <- function(dem) {
+    .Call(`_flowdem_d8_flow_directions`, dem)
+}
+
+d8_flow_accum <- function(flowdirs) {
+    .Call(`_flowdem_d8_flow_accum`, flowdirs)
+}
+
