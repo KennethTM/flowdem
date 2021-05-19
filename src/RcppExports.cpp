@@ -5,19 +5,44 @@
 
 using namespace Rcpp;
 
-// rcpp_hello_world
-List rcpp_hello_world();
-RcppExport SEXP _flowdem_rcpp_hello_world() {
+// pf_barnes2014
+NumericMatrix pf_barnes2014(NumericMatrix dem);
+RcppExport SEXP _flowdem_pf_barnes2014(SEXP demSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(rcpp_hello_world());
+    Rcpp::traits::input_parameter< NumericMatrix >::type dem(demSEXP);
+    rcpp_result_gen = Rcpp::wrap(pf_barnes2014(dem));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pf_eps_barnes2014
+NumericMatrix pf_eps_barnes2014(NumericMatrix dem);
+RcppExport SEXP _flowdem_pf_eps_barnes2014(SEXP demSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type dem(demSEXP);
+    rcpp_result_gen = Rcpp::wrap(pf_eps_barnes2014(dem));
+    return rcpp_result_gen;
+END_RCPP
+}
+// pf_watersheds_barnes2014
+List pf_watersheds_barnes2014(NumericMatrix dem);
+RcppExport SEXP _flowdem_pf_watersheds_barnes2014(SEXP demSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type dem(demSEXP);
+    rcpp_result_gen = Rcpp::wrap(pf_watersheds_barnes2014(dem));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_flowdem_rcpp_hello_world", (DL_FUNC) &_flowdem_rcpp_hello_world, 0},
+    {"_flowdem_pf_barnes2014", (DL_FUNC) &_flowdem_pf_barnes2014, 1},
+    {"_flowdem_pf_eps_barnes2014", (DL_FUNC) &_flowdem_pf_eps_barnes2014, 1},
+    {"_flowdem_pf_watersheds_barnes2014", (DL_FUNC) &_flowdem_pf_watersheds_barnes2014, 1},
     {NULL, NULL, 0}
 };
 
