@@ -27,14 +27,14 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// pf_watersheds_barnes2014
-List pf_watersheds_barnes2014(NumericMatrix dem);
-RcppExport SEXP _flowdem_pf_watersheds_barnes2014(SEXP demSEXP) {
+// pf_basins_barnes2014
+List pf_basins_barnes2014(NumericMatrix dem);
+RcppExport SEXP _flowdem_pf_basins_barnes2014(SEXP demSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericMatrix >::type dem(demSEXP);
-    rcpp_result_gen = Rcpp::wrap(pf_watersheds_barnes2014(dem));
+    rcpp_result_gen = Rcpp::wrap(pf_basins_barnes2014(dem));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -60,13 +60,39 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// d8_watershed
+IntegerMatrix d8_watershed(IntegerMatrix flowdirs, NumericMatrix target_rc);
+RcppExport SEXP _flowdem_d8_watershed(SEXP flowdirsSEXP, SEXP target_rcSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type flowdirs(flowdirsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type target_rc(target_rcSEXP);
+    rcpp_result_gen = Rcpp::wrap(d8_watershed(flowdirs, target_rc));
+    return rcpp_result_gen;
+END_RCPP
+}
+// d8_watershed_nested
+IntegerMatrix d8_watershed_nested(IntegerMatrix flowdirs, NumericMatrix target_rc);
+RcppExport SEXP _flowdem_d8_watershed_nested(SEXP flowdirsSEXP, SEXP target_rcSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerMatrix >::type flowdirs(flowdirsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type target_rc(target_rcSEXP);
+    rcpp_result_gen = Rcpp::wrap(d8_watershed_nested(flowdirs, target_rc));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_flowdem_pf_barnes2014", (DL_FUNC) &_flowdem_pf_barnes2014, 1},
     {"_flowdem_pf_eps_barnes2014", (DL_FUNC) &_flowdem_pf_eps_barnes2014, 1},
-    {"_flowdem_pf_watersheds_barnes2014", (DL_FUNC) &_flowdem_pf_watersheds_barnes2014, 1},
+    {"_flowdem_pf_basins_barnes2014", (DL_FUNC) &_flowdem_pf_basins_barnes2014, 1},
     {"_flowdem_d8_flow_directions", (DL_FUNC) &_flowdem_d8_flow_directions, 1},
     {"_flowdem_d8_flow_accum", (DL_FUNC) &_flowdem_d8_flow_accum, 1},
+    {"_flowdem_d8_watershed", (DL_FUNC) &_flowdem_d8_watershed, 2},
+    {"_flowdem_d8_watershed_nested", (DL_FUNC) &_flowdem_d8_watershed_nested, 2},
     {NULL, NULL, 0}
 };
 

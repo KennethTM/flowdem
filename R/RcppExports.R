@@ -9,8 +9,8 @@ pf_eps_barnes2014 <- function(dem) {
     .Call(`_flowdem_pf_eps_barnes2014`, dem)
 }
 
-pf_watersheds_barnes2014 <- function(dem) {
-    .Call(`_flowdem_pf_watersheds_barnes2014`, dem)
+pf_basins_barnes2014 <- function(dem) {
+    .Call(`_flowdem_pf_basins_barnes2014`, dem)
 }
 
 d8_flow_directions <- function(dem) {
@@ -19,5 +19,13 @@ d8_flow_directions <- function(dem) {
 
 d8_flow_accum <- function(flowdirs) {
     .Call(`_flowdem_d8_flow_accum`, flowdirs)
+}
+
+d8_watershed <- function(flowdirs, target_rc) {
+    .Call(`_flowdem_d8_watershed`, flowdirs, target_rc)
+}
+
+d8_watershed_nested <- function(flowdirs, target_rc) {
+    .Call(`_flowdem_d8_watershed_nested`, flowdirs, target_rc)
 }
 

@@ -43,6 +43,7 @@ const int dy[9] =     {0,  0, -1, -1, -1, 0, 1, 1,  1}; ///< y offsets of D8 nei
 // Constants used in functions
 int labels_nodata = 0;
 double dem_nodata = -9999.0;
+int watershed_nodata = 0;
 int flowdir_nodata = 0;
 double pittop = dem_nodata;
 int false_pit_cells = 0;
@@ -58,6 +59,7 @@ NumericMatrix pf_barnes2014(NumericMatrix dem){
   priority_queue<cellz, vector<cellz>, greater<cellz>> open;
   queue<cellz> pit;
   LogicalMatrix closed(dem.nrow(), dem.ncol());
+  //bool closed[dem.nrow()][dem.ncol()];
   
   // Add edge cells to priority queue
   // Horizontal edges
@@ -197,7 +199,7 @@ NumericMatrix pf_eps_barnes2014(NumericMatrix dem){
 
 
 // [[Rcpp::export]]
-List pf_watersheds_barnes2014(NumericMatrix dem){
+List pf_basins_barnes2014(NumericMatrix dem){
   
   // Improved priority flood with watershed labels (algorithm 5) in:
   // "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
@@ -347,7 +349,7 @@ NumericMatrix d8_flow_accum(IntegerMatrix flowdirs){
   double area_nodata = -1;
   
   //#pragma omp parallel for
-  for(int r=0; r<flowdirs.nrow(); r++){
+  for(int r = 0; r<flowdirs.nrow(); r++){
     for(int c = 0; c<flowdirs.ncol(); c++){
       if(flowdirs(r, c) == flowdir_nodata){
         area(r,c) = area_nodata;
@@ -408,3 +410,212 @@ NumericMatrix d8_flow_accum(IntegerMatrix flowdirs){
   return area;
 
 }
+
+// [[Rcpp::export]]
+IntegerMatrix d8_watershed(IntegerMatrix flowdirs, NumericMatrix target_rc){
+  
+  // Function for d8 watersheds to a target area identified by row-col indexes
+  IntegerMatrix watershed(flowdirs.nrow(), flowdirs.ncol());
+  
+  std::queue<cell> expansion;
+
+  for(int r = 0; r < target_rc.nrow(); r++){
+    expansion.push(cell(target_rc(r, 0)-1, target_rc(r, 1)-1));
+  }
+  
+  while(expansion.size()>0){
+    cell c = expansion.front();
+    expansion.pop();
+    
+    for(int n = 1; n <= 8; n++){
+      
+      int nc = c.c+dx[n];
+      int nr = c.r+dy[n];
+      
+      if(!(0<=nc && nc<flowdirs.ncol() && 0<=nr && nr<flowdirs.nrow()))
+        continue;
+      
+      else if(flowdirs(nr, nc) == flowdir_nodata)
+        continue;
+      
+      else if(watershed(nr, nc) == watershed_nodata && n == d8_inv[flowdirs(nr, nc)]){
+        expansion.push(cell(nr, nc));
+        watershed(nr, nc) = 1;
+      }
+    }
+  }
+  
+  return watershed;
+}
+
+// [[Rcpp::export]]
+IntegerMatrix d8_watershed_nested(IntegerMatrix flowdirs, NumericMatrix target_rc){
+  
+  // Function for d8 watersheds to a target area identified by row-col indexes with labeling of nested watersheds
+  IntegerMatrix watershed(flowdirs.nrow(), flowdirs.ncol());
+  
+  std::queue<cellz> expansion;
+  
+  for(int r = 0; r < target_rc.nrow(); r++){
+    expansion.push(cellz(target_rc(r, 0)-1, target_rc(r, 1)-1, target_rc(r, 2)));
+  }
+  
+  while(expansion.size()>0){
+    cellz c = expansion.front();
+    expansion.pop();
+    
+    for(int n = 1; n <= 8; n++){
+      
+      int nc = c.c+dx[n];
+      int nr = c.r+dy[n];
+      double label = c.z;
+      
+      if(!(0<=nc && nc<flowdirs.ncol() && 0<=nr && nr<flowdirs.nrow()))
+        continue;
+      
+      else if(flowdirs(nr, nc) == flowdir_nodata)
+        continue;
+      
+      else if(watershed(nr, nc) == watershed_nodata && n == d8_inv[flowdirs(nr, nc)]){
+        expansion.push(cellz(nr, nc, label));
+        watershed(nr, nc) = label;
+      }
+    }
+  }
+  
+  return watershed;
+}
+
+
+
+
+
+
+// //Fix breaching functions
+// //Create catchment function, add nested catchment functionality
+// 
+// 
+// // row-col index to single index
+// int xy_to_i(int col, int row, int ncol, int nrow){
+//   assert(0<=col && col<ncol && 0<=row && row<nrow);
+//   return row*ncol+col;
+// }
+// 
+// int i_to_c(int ind, int nc){
+//   int ind_col = ind % nc;
+//   return ind_col;
+// }
+// 
+// int i_to_r(int ind, int nc){
+//   int ind_r = ind / nc;
+//   return ind_r;
+// }
+// 
+// // [[Rcpp::export]]
+// NumericMatrix comp_breach_lindsay2016(NumericMatrix dem){
+//   //Complete breaching algorithm:
+//   //"Lindsay, J.B., 2016. Efficient hybrid breaching-filling sink removal methods for flow path enforcement in digital elevation models: Efficient Hybrid Sink Removal Methods for Flow Path Enforcement. Hydrological Processes 30, 846--857. doi:10.1002/hyp.10648"
+//   //As implemented in RichDEM
+//   
+//   int NO_BACK_LINK = numeric_limits<int>::max();
+//   
+//   int UNVISITED = 0;
+//   int VISITED = 1;
+//   int EDGE = 2;
+//   
+//   IntegerMatrix backlinks(dem.nrow(), dem.ncol());
+//   fill(backlinks.begin(), backlinks.end(), NO_BACK_LINK);
+//   IntegerMatrix visited(dem.nrow(), dem.ncol());
+//   LogicalMatrix pits(dem.nrow(), dem.ncol());
+// 
+//   int total_pits = 0;
+//   priority_queue<cellz, vector<cellz>, greater<cellz>> pq; //slightly different queue used in RichDEM
+// 
+//   //Seed the priority queue
+//   for(int r = 0; r < dem.nrow(); r++){
+//     for(int c = 0; c < dem.ncol(); c++){
+// 
+//       if(dem(r, c) == dem_nodata)
+//         continue;
+// 
+//       if(r==0 || c==0 || c == dem.ncol()-1 || r == dem.nrow()-1){
+//         pq.push(cellz(r, c, dem(r, c)));
+//         visited(r, c) = EDGE;
+//         continue;
+//       }
+// 
+//       double lowest_neighbour = numeric_limits<double>::max();
+//       for(int n = 1; n <= 8; n++){
+//         const int nc = c+dx[n];
+//         const int nr = r+dy[n];
+// 
+//         if(dem(nr, nc) == dem_nodata){
+//           pq.push(cellz(r, c, dem(r, c)));
+//           visited(r, c) = EDGE;
+//           goto nextcell;
+//         }
+// 
+//         lowest_neighbour = min(dem(nr, nc), lowest_neighbour);
+//       }
+// 
+//       if(dem(r, c) <= lowest_neighbour){
+//         dem(r, c) = lowest_neighbour;
+//         pits(r, c) = true;
+//         total_pits++; 
+//       }
+// 
+//       nextcell:;
+//     }
+//   }
+//   
+//   while(!pq.empty()){
+// 
+//     const cellz c = pq.top();
+//     pq.pop();
+// 
+//     if(pits(c.r,c.c)){
+//       //Locate a cell that is lower than the pit cell, or an edge cell
+//       int cc = xy_to_i(c.c, c.r, dem.ncol(), dem.nrow());               //Current cell on the path
+//       int cc_r = i_to_r(cc, dem.ncol());
+//       int cc_c = i_to_c(cc, dem.ncol());
+//       double target_height = dem(c.r,c.c);                     //Depth to which the cell currently being considered should be carved
+//       
+//       //Trace path back to a cell low enough for the path to drain into it, or
+//       //to an edge of the DEM
+//       while(cc != NO_BACK_LINK && dem(cc_r, cc_c)>=target_height){ 
+//         dem(cc_r, cc_c) = target_height;
+//         cc = backlinks(cc_r, cc_c);                                   
+//         cc_r = i_to_r(cc, dem.ncol());
+//         cc_c = i_to_c(cc, dem.ncol());
+//       }
+//       
+//       --total_pits;
+//       if(total_pits==0)
+//         break;
+//     }
+// 
+//     //Looks for neighbours which are either unvisited or pits
+//     for(int n = 1; n <= 8; n++){
+//       const int nc = c.c+dx[n];
+//       const int nr = c.r+dy[n];
+// 
+//       if(!(0<=nc && nc<dem.ncol() && 0<=nr && nr<dem.nrow()))
+//         continue;
+//       
+//       if(dem(nr, nc) == dem_nodata)
+//         continue;
+//       
+//       if(visited(nr, nc) != UNVISITED)
+//         continue;
+// 
+//       double my_e = dem(nr, nc);
+// 
+//       pq.push(cellz(nr, nc, my_e));
+//       visited(nr, nc) = VISITED;
+//       backlinks(nr, nc) = xy_to_i(c.c, c.r, dem.ncol(), dem.nrow());
+//     }
+//   }
+//   
+//   return dem;
+// }
+// 
