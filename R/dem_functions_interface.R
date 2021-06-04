@@ -178,48 +178,43 @@ dem_accumulation <- function(raster, mode = "d8"){
 #' @md
 #' @param direction RasterLayer object containing d8 flow direction.
 #' @param target RasterLayer, or sf POINT, POLYGON or MULTIPOLYGON object.
-#' @param vector_result TRUE or FALSE (default). Indicates whether the output watershed should be converted to a vector geometry.
 #' @param nested TRUE or FALSE (default). Indicates whether the output watersheds should be nested (a watershed for each pour-point).
 #' @return raster_watershed RasterLayer object delineated watershed.
 #' @export dem_watershed 
 #' @export
-dem_watershed <- function(direction, target, vector_out = FALSE, nested = FALSE){
+dem_watershed <- function(direction, target, nested = FALSE){
   
-  if(inherits(target, "sf")){
-    target_sp <- as(target, "Spatial")
-    if(st_is(target, "POINT")){
-      target_cells <- cellFromXY(direction, target_sp)
-      target_xy <- rowColFromCell(direction, unlist(target_cells))
-    }else if(st_is(target, "POLYGON") | st_is(target, "MULTIPOLYGON")){
-      target_cells <- cellFromPolygon(direction, target_sp)
-      target_xy <- rowColFromCell(direction, unlist(target_cells))
-    }else{
-      stop("sf type error")
+  if(!any(inherits(target, "RasterLayer"), !inherits(target, "sf"), !inherits(target, "Spatial"))){
+    stop("Input must be a RasterLayer, sf or sp object")
+  }
+
+  if(inherits(target, "sf") | inherits(target, "Spatial")){
+    
+    cell_df <- raster::extract(direction, target, cellnumbers=TRUE, df = TRUE)
+    cell_df <- cell_df[order(cell_df$cell, cell_df$ID), ]
+    cell_df_unique <- cell_df[!duplicated(cell_df$cell),]
+    target_xy <- raster::rowColFromCell(direction, cell_df_unique$cell)
+    target_xy <- cbind(target_xy, cell_df_unique$ID)
+    
+  }else if(inherits(target, "RasterLayer")){
+    
+    if(!compareRaster(direction, target)){
+      stop("Input direction and target rasters must match")
     }
-  }else if (inherits(target, "RasterLayer")){
+    
     target_cells <- which(target[] > 0)
-    target_xy <- rowColFromCell(direction, unlist(target_cells))
+    target_xy <- raster::rowColFromCell(direction, target_cells)
+    target_xy <- cbind(target_xy, target[target_cells])
+    
   }else{
-    stop("target type error")
+    stop("Something went wrong")
   }
   
   direction[is.na(direction)] <- 0
   direction_mat <- raster::as.matrix(direction)
-  
-  watershed_mat <- d8_watershed(direction_mat, target_xy)
-  
-  if(nested){
-    target_xy <- cbind(target_xy, 1:nrow(target_xy))
-    watershed_mat <- d8_watershed_nested(direction_mat, target_xy)
-  }
-  
+  watershed_mat <- d8_watershed_nested(direction_mat, target_xy, nested = nested)
   watershed_result <- raster::raster(watershed_mat, template = direction)
-  
-  if(vector_out){
-    watershed_result <- raster::rasterToPolygons(watershed_result, fun=function(x){x>0}, dissolve=TRUE, n=4) #8-connect?
-    watershed_result <- sf::st_as_sf(watershed_result)
-  }
-  
+
   return(watershed_result)
   
 }
