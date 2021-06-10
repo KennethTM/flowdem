@@ -13,6 +13,10 @@ pf_basins_barnes2014 <- function(dem) {
     .Call(`_flowdem_pf_basins_barnes2014`, dem)
 }
 
+comp_breach_lindsay2016 <- function(dem) {
+    .Call(`_flowdem_comp_breach_lindsay2016`, dem)
+}
+
 d8_flow_directions <- function(dem) {
     .Call(`_flowdem_d8_flow_directions`, dem)
 }
@@ -23,9 +27,5 @@ d8_flow_accum <- function(flowdirs) {
 
 d8_watershed_nested <- function(flowdirs, target_rc, nested) {
     .Call(`_flowdem_d8_watershed_nested`, flowdirs, target_rc, nested)
-}
-
-comp_breach_lindsay2016 <- function(dem) {
-    .Call(`_flowdem_comp_breach_lindsay2016`, dem)
 }
 
