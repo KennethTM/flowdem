@@ -49,8 +49,22 @@ accum <- function(dirs, mode = "d8"){
     stop("Only the 'deterministic eight' (d8) flow model is supported for now.")
   }
   
-  if(!is.integer(dirs[]) | min(dirs[], na.rm = TRUE) < 1 | max(dirs[], na.rm = TRUE) > 8){
-    stop("Input must have d8 flow directions encoded as integers between 1 and 8")
+  if(dirs@data@haveminmax){
+    input_min <- dirs@data@min
+    input_max <- dirs@data@max
+  }else{
+    input_min <- min(dirs[], na.rm = TRUE)
+    input_max <- max(dirs[], na.rm = TRUE)
+  }
+  
+  if(!is.integer(dirs[]) | input_min < 1 | input_max > 8){
+    stop("Input must have d8 flow directions 
+          encoded as integers between 1 and 8
+          using the following flow coordinate 
+          system (0 is the focal cell):
+          234
+          105
+          876")
   }
   
   dirs_mat <- raster::as.matrix(dirs)
@@ -67,7 +81,7 @@ accum <- function(dirs, mode = "d8"){
 }
 
 
-#' Delineate watersheds (same as catchment, upslope area, contributing area) from a flow direction raster and target area given as vector or raster object.
+#' Delineate watersheds (equivalent terms: catchment area, upslope area, contributing area, basin) from a flow direction raster and target area given as vector or raster object.
 #' 
 #' @md
 #' @param dirs RasterLayer object containing d8 flow direction.
@@ -87,13 +101,32 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
     stop("Only the 'deterministic eight' (d8) flow model is supported for now.")
   }
   
+  if(dirs@data@haveminmax){
+    input_min <- dirs@data@min
+    input_max <- dirs@data@max
+  }else{
+    input_min <- min(dirs[], na.rm = TRUE)
+    input_max <- max(dirs[], na.rm = TRUE)
+  }
+  
+  if(!is.integer(dirs[]) | input_min < 1 | input_max > 8){
+    stop("Input must have d8 flow directions 
+          encoded as integers between 1 and 8
+          using the following flow coordinate 
+          system (0 is the focal cell):
+          234
+          105
+          876")
+  }
+  
   if(inherits(target, "sf") | inherits(target, "Spatial")){
     
     cell_df <- raster::extract(dirs, target, cellnumbers=TRUE, df = TRUE)
-    cell_df <- cell_df[order(cell_df$cell, cell_df$ID), ]
-    cell_df_unique <- cell_df[!duplicated(cell_df$cell),]
-    target_xy <- raster::rowColFromCell(dirs, cell_df_unique$cell)
-    target_xy <- cbind(target_xy, cell_df_unique$ID)
+    #cell_df <- cell_df[order(cell_df$cell, cell_df$ID), ]
+    #cell_df_unique <- cell_df[!duplicated(cell_df$cell),]
+    #target_xy <- raster::rowColFromCell(dirs, cell_df_unique$cell)
+    target_xy <- raster::rowColFromCell(dirs, cell_df$cell)
+    target_xy <- cbind(target_xy, cell_df$ID)
     
   }else if(inherits(target, "RasterLayer")){
     
@@ -109,6 +142,11 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
     stop("Something went wrong")
   }
   
+  if(nrow(target_xy) == 0){
+    stop("No outlets found. 
+          Do the function arguments dirs and target intersect geographically? Do the projections match each other?")
+  }
+  
   dirs_mat <- raster::as.matrix(dirs)
   dirs_mat[is.na(dirs_mat)] <- 0
   
@@ -120,4 +158,3 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
   return(watershed)
   
 }
-

@@ -404,9 +404,8 @@ NumericMatrix comp_breach_lindsay2016(NumericMatrix dem){
 
 // Flow directions
 
+// Helper function for determining d8 flow directions (RichDEM)
 static int d8_flowdir(NumericMatrix dem, const int r, const int c){
-  
-  // Helper function for determining d8 flow directions (RichDEM)
   
   double minimum_elevation = dem(r, c);
   int flowdir = 0;
