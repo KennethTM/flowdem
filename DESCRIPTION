@@ -2,10 +2,10 @@ Package: flowdem
 Type: Package
 Title: Flow routing on digital elevation models
 Version: 0.1
-Date: 2021-05-19
+Date: 2021-07-30
 Author: Kenneth Thorø Martinsen
 Maintainer: Kenneth Thorø Martinsen <kenneth2810@gmail.com>
-Description: Packaging supporting workflows involved in flow routing on digital elevation models including functions for resolving depressions etc.
+Description: Package containing algorithms and functions involved in flow routing on digital elevation models
 License: GPL (>= 2)
 Encoding: UTF-8
 Imports: Rcpp (>= 1.0.6), raster
