@@ -49,7 +49,7 @@ dk_dem_breach_fill_eps <- fill(dk_dem_breach, epsilon = TRUE)
 
 The filling and breaching operations affects the DEM very differently as shown here where differences between the raw DEM and the filled and breached DEMs in a small sub-region:
 
-![](https://github.com/KennethTM/flowdem/blob/master/test/fill_vs_breach.png)
+![](https://github.com/KennethTM/flowdem/blob/main/test/fill_vs_breach.png)
 
 After filling and/or breaching and resolving flats on the DEM, flow directions can be calculated and used to delineate flow paths for example:
 
@@ -71,7 +71,7 @@ lake <- st_read("test/lake_arre.sqlite")
 lake_watershed <- watershed(dk_dem_breach_fill_eps, lake)
 ```
 
-![](https://github.com/KennethTM/flowdem/blob/master/test/watershed_delin.png)
+![](https://github.com/KennethTM/flowdem/blob/main/test/watershed_delin.png)
 
 The library support watershed delineation to a target point, line or polygon used in the 'sp' or 'sf' packages. A raster can also be supplied. Furthermore, the library supports delineation of nested watersheds where each watershed is assigned a unique id.
 
