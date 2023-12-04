@@ -121,13 +121,18 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
   
   if(inherits(target, "sf") | inherits(target, "Spatial")){
     
-    cell_df <- raster::extract(dirs, target, cellnumbers=TRUE, df = TRUE)
-    #cell_df <- cell_df[order(cell_df$cell, cell_df$ID), ]
-    #cell_df_unique <- cell_df[!duplicated(cell_df$cell),]
-    #target_xy <- raster::rowColFromCell(dirs, cell_df_unique$cell)
-    target_xy <- raster::rowColFromCell(dirs, cell_df$cell)
-    target_xy <- cbind(target_xy, cell_df$ID)
-    
+    # Special case when target is a single line
+    if(nrow(target) == 1){
+      target_cells <- raster::extract(dirs, target, cellnumbers = TRUE)
+      target_xy <- raster::rowColFromCell(dirs, target_cells[[1]][,1])
+      target_xy <- cbind(target_xy, rep(1, nrow(target_xy)))
+    } else {
+      # General case (crashes when target is a single line
+      cell_df <- raster::extract(dirs, target, cellnumbers=TRUE, df = TRUE)
+      target_xy <- raster::rowColFromCell(dirs, cell_df$cell)
+      target_xy <- cbind(target_xy, cell_df$ID)
+    }
+	
   }else if(inherits(target, "RasterLayer")){
     
     if(!compareRaster(dirs, target)){
