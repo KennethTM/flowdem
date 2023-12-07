@@ -121,8 +121,8 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
   
   if(inherits(target, "sf") | inherits(target, "Spatial")){
     
-    # Special case when target is a single line
-    if(nrow(target) == 1){
+    # Special case when target is a single linestring
+    if((nrow(target) == 1) & ((st_geometry_type(target)[1]) == "LINESTRING")){
       target_cells <- raster::extract(dirs, target, cellnumbers = TRUE)
       target_xy <- raster::rowColFromCell(dirs, target_cells[[1]][,1])
       target_xy <- cbind(target_xy, rep(1, nrow(target_xy)))
