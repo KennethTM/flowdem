@@ -7,7 +7,7 @@
 #' @param dem The input digital elevation model (DEM)
 #' @return The DEM with depressions removed
 pf_barnes2014 <- function(dem) {
-    .Call(`_flowdem_pf_barnes2014`, dem)
+    .Call('_flowdem_pf_barnes2014', PACKAGE = 'flowdem', dem)
 }
 
 #' Improved priority flood (algorithm 3) in:
@@ -16,7 +16,7 @@ pf_barnes2014 <- function(dem) {
 #' @param dem The input digital elevation model (DEM)
 #' @return The DEM with depressions removed
 pf_eps_barnes2014 <- function(dem) {
-    .Call(`_flowdem_pf_eps_barnes2014`, dem)
+    .Call('_flowdem_pf_eps_barnes2014', PACKAGE = 'flowdem', dem)
 }
 
 #' Improved priority flood with watershed labels (algorithm 5) in:
@@ -25,7 +25,7 @@ pf_eps_barnes2014 <- function(dem) {
 #' @param dem The input digital elevation model (DEM)
 #' @return List of two rasters: one with the filled input dem and one integer raster with basin labels
 pf_basins_barnes2014 <- function(dem) {
-    .Call(`_flowdem_pf_basins_barnes2014`, dem)
+    .Call('_flowdem_pf_basins_barnes2014', PACKAGE = 'flowdem', dem)
 }
 
 #' Complete breaching algorithm:
@@ -35,7 +35,7 @@ pf_basins_barnes2014 <- function(dem) {
 #' @param dem The input digital elevation model (DEM)
 #' @return The DEM with depressions breached
 comp_breach_lindsay2016 <- function(dem) {
-    .Call(`_flowdem_comp_breach_lindsay2016`, dem)
+    .Call('_flowdem_comp_breach_lindsay2016', PACKAGE = 'flowdem', dem)
 }
 
 #' Function for determining d8 flow directions (RichDEM)
@@ -43,7 +43,7 @@ comp_breach_lindsay2016 <- function(dem) {
 #' @param dem The input digital elevation model (DEM)
 #' @return a d8 flow direction raster
 d8_flow_directions <- function(dem) {
-    .Call(`_flowdem_d8_flow_directions`, dem)
+    .Call('_flowdem_d8_flow_directions', PACKAGE = 'flowdem', dem)
 }
 
 #' Function for determining d8 flow accumulation (RichDEM)
@@ -51,7 +51,7 @@ d8_flow_directions <- function(dem) {
 #' @param flowdirs The d8 pointer flow direction raster
 #' @return a flow accumulation raster
 d8_flow_accum <- function(flowdirs) {
-    .Call(`_flowdem_d8_flow_accum`, flowdirs)
+    .Call('_flowdem_d8_flow_accum', PACKAGE = 'flowdem', flowdirs)
 }
 
 #' Function for d8 watersheds to a target area identified by row-col indexes
@@ -62,6 +62,6 @@ d8_flow_accum <- function(flowdirs) {
 #' @param nested Boolean
 #' @return a flow accumulation raster
 d8_watershed_nested <- function(flowdirs, target_rc, nested) {
-    .Call(`_flowdem_d8_watershed_nested`, flowdirs, target_rc, nested)
+    .Call('_flowdem_d8_watershed_nested', PACKAGE = 'flowdem', flowdirs, target_rc, nested)
 }
 
