@@ -123,12 +123,12 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
   if(inherits(target, "sf") | inherits(target, "Spatial")){
     
     # Special case when target is a single linestring
-    if((nrow(target) == 1) & ((st_geometry_type(target)[1]) == "LINESTRING")){
+    if((nrow(target) == 1) & ((sf::st_geometry_type(target)[1]) == "LINESTRING")){
       target_cells <- raster::extract(dirs, target, cellnumbers = TRUE)
       target_xy <- raster::rowColFromCell(dirs, target_cells[[1]][,1])
       target_xy <- cbind(target_xy, rep(1, nrow(target_xy)))
     } else {
-      # General case (crashes when target is a single line
+      # General case (crashes when target is a single line)
       cell_df <- raster::extract(dirs, target, cellnumbers=TRUE, df = TRUE)
       target_xy <- raster::rowColFromCell(dirs, cell_df$cell)
       target_xy <- cbind(target_xy, cell_df$ID)
@@ -136,7 +136,7 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
 	
   }else if(inherits(target, "RasterLayer")){
     
-    if(!compareRaster(dirs, target)){
+    if(!raster::compareRaster(dirs, target)){
       stop("Input dirs and target rasters must match")
     }
     
