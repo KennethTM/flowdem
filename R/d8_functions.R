@@ -4,6 +4,7 @@
 #' 
 #' @md
 #' @param dem RasterLayer object containing the digital elevation model.
+#' @param mode Only 'd8' supported for now.
 #' @return dirs RasterLayer object with flow directions.
 #' @export dirs 
 #' @export

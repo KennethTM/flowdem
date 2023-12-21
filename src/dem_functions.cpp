@@ -42,12 +42,14 @@ public:
 
 // Depressions
 
+//' Improved priority flood (algorithm 2) in:
+//' "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
+//'
+//' @param dem The input digital elevation model (DEM)
+//' @return The DEM with depressions removed
 // [[Rcpp::export]]
 NumericMatrix pf_barnes2014(NumericMatrix dem){
-  
-  // Improved priority flood (algorithm 2) in:
-  // "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
-  
+
   priority_queue<cellz, vector<cellz>, greater<cellz>> open;
   queue<cellz> pit;
   LogicalMatrix closed(dem.nrow(), dem.ncol());
@@ -109,12 +111,14 @@ NumericMatrix pf_barnes2014(NumericMatrix dem){
   
 }
 
+//' Improved priority flood (algorithm 3) in:
+//' "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
+//'
+//' @param dem The input digital elevation model (DEM)
+//' @return The DEM with depressions removed
 // [[Rcpp::export]]
 NumericMatrix pf_eps_barnes2014(NumericMatrix dem){
-  
-  // Improved priority flood (algorithm 3) in:
-  // "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
-  
+
   priority_queue<cellz, vector<cellz>, greater<cellz>> open;
   queue<cellz> pit;
   LogicalMatrix closed(dem.nrow(), dem.ncol());
@@ -190,12 +194,14 @@ NumericMatrix pf_eps_barnes2014(NumericMatrix dem){
   return(dem);
 }
 
+//' Improved priority flood with watershed labels (algorithm 5) in:
+//' "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
+//'
+//' @param dem The input digital elevation model (DEM)
+//' @return List of two rasters: one with the filled input dem and one integer raster with basin labels
 // [[Rcpp::export]]
 List pf_basins_barnes2014(NumericMatrix dem){
-  
-  // Improved priority flood with watershed labels (algorithm 5) in:
-  // "Barnes, R., Lehman, C., Mulla, D., 2014. Priority-flood: An optimal depression-filling and watershed-labeling algorithm for digital elevation models. Computers & Geosciences 62, 117–127. doi:10.1016/j.cageo.2013.04.024"
-  
+
   priority_queue<cellz, vector<cellz>, greater<cellz>> open;
   queue<cellz> pit;
   LogicalMatrix closed(dem.nrow(), dem.ncol());
@@ -291,13 +297,15 @@ int i_to_c(const int i, NumericMatrix m){
   return col;
 }
 
+//' Complete breaching algorithm:
+//' "Lindsay, J.B., 2016. Efficient hybrid breaching-filling sink removal methods for flow path enforcement in digital elevation models: Efficient Hybrid Sink Removal Methods for Flow Path Enforcement. Hydrological Processes 30, 846--857. doi:10.1002/hyp.10648"
+//' As implemented in RichDEM
+//'
+//' @param dem The input digital elevation model (DEM)
+//' @return The DEM with depressions breached
 // [[Rcpp::export]]
 NumericMatrix comp_breach_lindsay2016(NumericMatrix dem){
-  
-  //Complete breaching algorithm:
-  //"Lindsay, J.B., 2016. Efficient hybrid breaching-filling sink removal methods for flow path enforcement in digital elevation models: Efficient Hybrid Sink Removal Methods for Flow Path Enforcement. Hydrological Processes 30, 846--857. doi:10.1002/hyp.10648"
-  //As implemented in RichDEM
-  
+
   int NO_BACK_LINK = numeric_limits<int>::max();
   
   int UNVISITED = 0;
@@ -442,11 +450,13 @@ static int d8_flowdir(NumericMatrix dem, const int r, const int c){
   
 }
 
+//' Function for determining d8 flow directions (RichDEM)
+//'
+//' @param dem The input digital elevation model (DEM)
+//' @return a d8 flow direction raster
 // [[Rcpp::export]]
 IntegerMatrix d8_flow_directions(NumericMatrix dem){
-  
-  // Function for determining d8 flow directions(RichDEM)
-  
+
   IntegerMatrix flowdirs(dem.nrow(), dem.ncol());
 
   // For potential parallel solution see https://mfasiolo.github.io/sc2-2019/rcpp_advanced_iii/2_rcppparallel/
@@ -461,12 +471,12 @@ IntegerMatrix d8_flow_directions(NumericMatrix dem){
   return flowdirs;
 }
 
-// Flow accumulation
-
+//' Function for determining d8 flow accumulation (RichDEM)
+//'
+//' @param flowdirs The d8 pointer flow direction raster
+//' @return a flow accumulation raster
 // [[Rcpp::export]]
 NumericMatrix d8_flow_accum(IntegerMatrix flowdirs){
-  
-  // Function for determining d8 flow accumulation (RichDEM)
   
   std::queue<cell> sources;
   
@@ -538,12 +548,16 @@ NumericMatrix d8_flow_accum(IntegerMatrix flowdirs){
 
 // Watershed delineation
 
+//' Function for d8 watersheds to a target area identified by row-col indexes
+//' Potentially with labeling of nested watersheds
+//'
+//' @param flowdirs The d8 pointer flow direction raster
+//' @param target_rc The outlet
+//' @param nested Boolean
+//' @return a flow accumulation raster
 // [[Rcpp::export]]
 IntegerMatrix d8_watershed_nested(IntegerMatrix flowdirs, NumericMatrix target_rc, bool nested){
-  
-  // Function for d8 watersheds to a target area identified by row-col indexes 
-  // Potentially with labeling of nested watersheds
-  
+
   IntegerMatrix watershed(flowdirs.nrow(), flowdirs.ncol());
   std::queue<cellz> expansion;
   int watershed_nodata = 0;
