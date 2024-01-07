@@ -10,11 +10,11 @@
 #' @export
 fill <- function(dem, epsilon = TRUE){
   
-  if(!inherits(dem, "RasterLayer")){
+  if(!inherits(dem, "SpatRaster")){
     stop("Input must be a RasterLayer object from the raster package")
   }
   
-  dem_mat <- raster::as.matrix(dem)
+  dem_mat <- terra::as.matrix(dem)
   class(dem_mat) <- "numeric" #explicit conversion to double to avoid issues when integer matrix are passed
   dem_mat[is.na(dem_mat)] <- -9999
   
@@ -25,11 +25,10 @@ fill <- function(dem, epsilon = TRUE){
   }
   
   dem_mat[dem_mat == -9999] <- NA
-  dem_fill <- raster::raster(dem_mat, template = dem)
-  raster::dataType(dem_fill) <- "FLT8S"
-  
+  dem_fill <- dem
+  terra::values(dem_fill) <- dem_mat
+
   return(dem_fill)
-  
 }
 
 #' Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm, and delineate drainage basins simultaneously.
