@@ -3,30 +3,31 @@
 #' Determine flow directions on digital elevation models
 #' 
 #' @md
-#' @param dem RasterLayer object containing the digital elevation model.
+#' @param dem terra::SpatRaster object containing the digital elevation model.
 #' @param mode Only 'd8' supported for now.
-#' @return dirs RasterLayer object with flow directions.
+#' @return dirs terra::SpatRaster object with flow directions.
 #' @export dirs 
 #' @export
 dirs <- function(dem, mode = "d8"){
   
-  if(!inherits(dem, "RasterLayer")){
-    stop("Input must be a RasterLayer object from the raster package")
+  if(!inherits(dem, "SpatRaster")){
+    stop("Input must be a SpatRaster object from the terra package")
   }
   
   if(mode != "d8"){
     stop("Only the 'deterministic eight' (d8) flow model is supported for now.")
   }
   
-  dem_mat <- raster::as.matrix(dem)
+  dem_mat <- terra::as.matrix(dem, wide=TRUE)
   class(dem_mat) <- "numeric"
   dem_mat[is.na(dem_mat)] <- -9999
   
   dirs_mat <- d8_flow_directions(dem_mat)
   
   dirs_mat[dirs_mat == 0] <- NA
-  dirs <- raster::raster(dirs_mat, template = dem)
-  raster::dataType(dirs) <- "INT1U"
+
+  dirs <- dem
+  terra::values(dirs) <- dirs_mat
   
   return(dirs)
   
@@ -35,29 +36,25 @@ dirs <- function(dem, mode = "d8"){
 #' Determine flow accumulation on digital elevation models
 #' 
 #' @md
-#' @param dirs RasterLayer object with flow directions.
+#' @param dirs terra::SpatRaster object with flow directions.
 #' @param mode Only 'd8' supported for now.
-#' @return accum RasterLayer object with flow accumulation.
+#' @return accum terra::SpatRaster object with flow accumulation.
 #' @export accum 
 #' @export
 accum <- function(dirs, mode = "d8"){
   
-  if(!inherits(dirs, "RasterLayer")){
-    stop("Input must be a RasterLayer object from the raster package")
+  if(!inherits(dirs, "SpatRaster")){
+    stop("Input must be a SpatRaster object from the terra package")
   }
   
   if(mode != "d8"){
     stop("Only the 'deterministic eight' (d8) flow model is supported for now.")
   }
   
-  if(dirs@data@haveminmax){
-    input_min <- dirs@data@min
-    input_max <- dirs@data@max
-  }else{
-    input_min <- min(dirs[], na.rm = TRUE)
-    input_max <- max(dirs[], na.rm = TRUE)
-  }
-  
+  mm <- terra::minmax(dirs, compute = TRUE)
+  input_min <- mm[1]
+  input_max <- mm[2]
+
   if(!is.integer(dirs[]) | input_min < 1 | input_max > 8){
     stop("Input must have d8 flow directions 
           encoded as integers between 1 and 8
@@ -68,16 +65,16 @@ accum <- function(dirs, mode = "d8"){
           876")
   }
   
-  dirs_mat <- raster::as.matrix(dirs)
+  dirs_mat <- terra::as.matrix(dirs, wide=TRUE)
   dirs_mat[is.na(dirs_mat)] <- 0
   
   acc_mat <- d8_flow_accum(dirs_mat)
   
   acc_mat[acc_mat == -1] <- NA
-  acc <- raster::raster(acc_mat, template = dirs)
-  raster::dataType(acc) <- "FLT8S"
+  accum <- dirs
+  terra::values(accum) <- acc_mat
   
-  return(acc)
+  return(accum)
   
 }
 
