@@ -66,26 +66,25 @@ fill_basins <- function(dem){
 #' Remove depressions from digital elevation models by breaching depressions
 #' 
 #' @md
-#' @param dem RasterLayer object containing the digital elevation model.
-#' @return dem_breach RasterLayer object with depressions filled.
+#' @param dem terra::SpatRaster object containing the digital elevation model.
+#' @return dem_breach terra::SpatRaster object with depressions filled.
 #' @export breach 
 #' @export
 breach <- function(dem){
   
-  if(!inherits(dem, "RasterLayer")){
-    stop("Input must be a RasterLayer object from the raster package")
+  if(!inherits(dem, "SpatRaster")){
+    stop("Input must be a SpatRaster object from the terra package")
   }
   
-  dem_mat <- raster::as.matrix(dem)
+  dem_mat <- terra::as.matrix(dem, wide=TRUE)
   class(dem_mat) <- "numeric"
   dem_mat[is.na(dem_mat)] <- -9999
   
   comp_breach_lindsay2016(dem_mat)
   
   dem_mat[dem_mat == -9999] <- NA
-  dem_breach <- raster::raster(dem_mat, template = dem)
-  raster::dataType(dem_breach) <- "FLT8S"
+  terra::values(dem) <- dem_mat
   
-  return(dem_breach)
+  return(dem)
   
 }
