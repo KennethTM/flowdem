@@ -23,13 +23,13 @@ After processing the DEM, several useful things can be done including: delineati
 
 ### Example useage
 
-The library uses the 'raster' R-package for managing raster data. Here, a sample DEM from Denmark (10 m resolution) is used to showcase functions of the library:
+The library uses the 'terra' R-package for managing raster data. Here, a sample DEM from Denmark (10 m resolution) is used to showcase functions of the library:
 
 ```r
-library(flowdem);library(raster)
+library(flowdem);library(terra)
 
 #Read in the raster data
-dk_dem <- raster("test/dk_dem_sub.tif")
+dk_dem <- rast("test/dk_dem_sub.tif")
 
 #Fill DEM and leave surfaces flat
 dk_dem_fill <- fill(dk_dem, epsilon = FALSE)
