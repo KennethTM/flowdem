@@ -1,5 +1,7 @@
 #Functions using the d8 flow routing model
 
+#' Determine flow directions
+#' 
 #' Determine flow directions on digital elevation models
 #' 
 #' @md
@@ -33,6 +35,9 @@ dirs <- function(dem, mode = "d8"){
   
 }
 
+
+#' Determine flow accumulation
+#' 
 #' Determine flow accumulation on digital elevation models
 #' 
 #' @md
@@ -55,7 +60,7 @@ accum <- function(dirs, mode = "d8"){
   input_min <- mm[1]
   input_max <- mm[2]
 
-  if(!is.integer(dirs[]) | input_min < 1 | input_max > 8){
+  if(!terra::is.int(dirs) | input_min < 1 | input_max > 8){
     stop("Input must have d8 flow directions 
           encoded as integers between 1 and 8
           using the following flow coordinate 
@@ -78,7 +83,8 @@ accum <- function(dirs, mode = "d8"){
   
 }
 
-
+#' Delineate watersheds
+#' 
 #' Delineate watersheds (equivalent terms: catchment area, upslope area, contributing area, basin) from a flow direction raster and target area given as vector or raster object.
 #' 
 #' @md
@@ -107,7 +113,7 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
   input_min <- mm[1]
   input_max <- mm[2]
   
-  if(!is.integer(dirs[]) | input_min < 1 | input_max > 8){
+  if(!terra::is.int(dirs) | input_min < 1 | input_max > 8){
     stop("Input must have d8 flow directions 
           encoded as integers between 1 and 8
           using the following flow coordinate 

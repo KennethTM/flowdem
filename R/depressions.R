@@ -1,6 +1,9 @@
 #Functions for dealing with depressions in digital elevation models
 
-#' Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm
+#' Remove depressions by filling
+#'
+#' Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm. See details to be aware of when write the results to file.
+#'
 #' WARNING: The correction added to ensure flow on flat surfaces is REALLY small (< 1e-8)
 #' which is not a problem as long as filled_eps remains in memory (terra always uses FLT8S for cell values
 #' while in memory), but may be lost during writing to disk (terra uses datatype set in terraOptions()
@@ -35,6 +38,8 @@ fill <- function(dem, epsilon = TRUE){
   return(dem)
 }
 
+#' Remove depressions by filling and delineate drainage basins
+#' 
 #' Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm, and delineate drainage basins simultaneously.
 #' 
 #' @md
@@ -68,6 +73,8 @@ fill_basins <- function(dem){
 
 }
 
+#' Remove depressions by breaching
+#'
 #' Remove depressions from digital elevation models by breaching depressions
 #' 
 #' @md

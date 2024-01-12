@@ -2,7 +2,7 @@
 % Please edit documentation in R/depressions.R
 \name{breach}
 \alias{breach}
-\title{Remove depressions from digital elevation models by breaching depressions}
+\title{Remove depressions by breaching}
 \usage{
 breach(dem)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/depressions.R
 \name{fill_basins}
 \alias{fill_basins}
-\title{Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm, and delineate drainage basins simultaneously.}
+\title{Remove depressions by filling and delineate drainage basins}
 \usage{
 fill_basins(dem)
 }

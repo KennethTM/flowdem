@@ -2,7 +2,7 @@
 % Please edit documentation in R/d8_functions.R
 \name{accum}
 \alias{accum}
-\title{Determine flow accumulation on digital elevation models}
+\title{Determine flow accumulation}
 \usage{
 accum(dirs, mode = "d8")
 }

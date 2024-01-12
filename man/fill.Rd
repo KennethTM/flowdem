@@ -2,12 +2,7 @@
 % Please edit documentation in R/depressions.R
 \name{fill}
 \alias{fill}
-\title{Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm
-WARNING: The correction added to ensure flow on flat surfaces is REALLY small (< 1e-8)
-which is not a problem as long as filled_eps remains in memory (terra always uses FLT8S for cell values
-while in memory), but may be lost during writing to disk (terra uses datatype set in terraOptions()
-for cell values when writing to disk, default is FLT4S). When saving DEMs filled with epsilon to disk,
-set the datatype to FLT8S either in terraOptions() or in terra::writeRaster().}
+\title{Remove depressions by filling}
 \usage{
 fill(dem, epsilon = TRUE)
 }
@@ -20,7 +15,9 @@ fill(dem, epsilon = TRUE)
 dem_fill terra::SpatRaster object containing the digital elevation model with depressions removed.
 }
 \description{
-Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm
+Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm. See details to be aware of when write the results to file.
+}
+\details{
 WARNING: The correction added to ensure flow on flat surfaces is REALLY small (< 1e-8)
 which is not a problem as long as filled_eps remains in memory (terra always uses FLT8S for cell values
 while in memory), but may be lost during writing to disk (terra uses datatype set in terraOptions()
