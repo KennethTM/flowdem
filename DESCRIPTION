@@ -5,9 +5,14 @@ Version: 0.1
 Date: 2021-07-30
 Author: Kenneth Thorø Martinsen
 Maintainer: Kenneth Thorø Martinsen <kenneth2810@gmail.com>
-Description: Package containing algorithms and functions involved in flow routing on digital elevation models
+Description: Contains algorithms and functions involved in flow routing on digital elevation models.
 License: GPL (>= 2)
 Encoding: UTF-8
-Imports: Rcpp (>= 1.0.6), raster
+Imports: Rcpp (>= 1.0.6), terra
 LinkingTo: Rcpp
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.3
+Suggests: 
+    testthat (>= 3.0.0), sf
+Config/testthat/edition: 3
+Depends: 
+    R (>= 2.10)

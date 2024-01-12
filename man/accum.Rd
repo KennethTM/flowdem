@@ -7,12 +7,12 @@
 accum(dirs, mode = "d8")
 }
 \arguments{
-\item{dirs}{RasterLayer object with flow directions.}
+\item{dirs}{terra::SpatRaster object with flow directions.}
 
 \item{mode}{Only 'd8' supported for now.}
 }
 \value{
-accum RasterLayer object with flow accumulation.
+accum terra::SpatRaster object with flow accumulation.
 }
 \description{
 Determine flow accumulation on digital elevation models

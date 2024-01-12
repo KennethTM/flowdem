@@ -1,4 +1,7 @@
 .Rbuildignore
 .Rproj.user/
 .Rhistory
+.idea/
 flowdem.Rproj
+man/
+*.dll

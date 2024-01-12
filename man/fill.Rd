@@ -2,18 +2,28 @@
 % Please edit documentation in R/depressions.R
 \name{fill}
 \alias{fill}
-\title{Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm}
+\title{Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm
+WARNING: The correction added to ensure flow on flat surfaces is REALLY small (< 1e-8)
+which is not a problem as long as filled_eps remains in memory (terra always uses FLT8S for cell values
+while in memory), but may be lost during writing to disk (terra uses datatype set in terraOptions()
+for cell values when writing to disk, default is FLT4S). When saving DEMs filled with epsilon to disk,
+set the datatype to FLT8S either in terraOptions() or in terra::writeRaster().}
 \usage{
 fill(dem, epsilon = TRUE)
 }
 \arguments{
-\item{dem}{RasterLayer object containing the digital elevation model.}
+\item{dem}{terra::SpatRaster object containing the digital elevation model.}
 
 \item{epsilon}{TRUE (default) or FALSE. If TRUE, cell elevations in depressions are be increased to ensure drainage. If FALSE, filled depressions are left as flat surfaces.}
 }
 \value{
-dem_fill RasterLayer object containing the digital elevation model with depressions removed.
+dem_fill terra::SpatRaster object containing the digital elevation model with depressions removed.
 }
 \description{
 Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm
+WARNING: The correction added to ensure flow on flat surfaces is REALLY small (< 1e-8)
+which is not a problem as long as filled_eps remains in memory (terra always uses FLT8S for cell values
+while in memory), but may be lost during writing to disk (terra uses datatype set in terraOptions()
+for cell values when writing to disk, default is FLT4S). When saving DEMs filled with epsilon to disk,
+set the datatype to FLT8S either in terraOptions() or in terra::writeRaster().
 }

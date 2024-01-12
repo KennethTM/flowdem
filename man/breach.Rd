@@ -7,10 +7,10 @@
 breach(dem)
 }
 \arguments{
-\item{dem}{RasterLayer object containing the digital elevation model.}
+\item{dem}{terra::SpatRaster object containing the digital elevation model.}
 }
 \value{
-dem_breach RasterLayer object with depressions filled.
+dem_breach terra::SpatRaster object with depressions filled.
 }
 \description{
 Remove depressions from digital elevation models by breaching depressions

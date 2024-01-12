@@ -7,10 +7,10 @@
 fill_basins(dem)
 }
 \arguments{
-\item{dem}{RasterLayer object containing the digital elevation model.}
+\item{dem}{terra::SpatRaster object containing the digital elevation model.}
 }
 \value{
-dem_fill_basins RasterStack object two layers: one with the filled input dem and one integer raster with basin labels
+dem_fill_basins terra::SpatRaster object with two layers: one with the filled input dem and one integer raster with basin labels
 }
 \description{
 Remove depressions from a digital elevation model by filling it inwards from the edges using the Priority-Flood algorithm, and delineate drainage basins simultaneously.
