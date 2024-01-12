@@ -1,50 +1,65 @@
 
-# flowdem package
+# flowdem: Revolutionize your flow routing with digital elevation models in R!
 
-## R-package for flow routing on digital elevation models
+## Overview
 
-### Installation
+Are you tired of struggling with complex algorithms to process and
+analyze digital elevation models (DEMs) for accurate water flow
+modeling? Look no further! The “flowdem” package is here to simplify
+your life. With specialized algorithms, “flowdem” allows you to
+delineate watersheds, stream networks, and perform other essential tasks
+related to flow routing on DEMs with ease.
 
-Use the ‘remotes’ package to install the package from Github:
+## Installation
+
+To enjoy the latest version of “flowdem”, simply use the following
+command in R with the “remotes” package:
 
 ``` r
-remotes::install_github('KennethTM/flowdem')
+remotes::install_github("KennethTM/flowdem")
 ```
 
-### Background
+## Key Features
 
-Water flow can be modelled using a digital elevation model (DEM) often
-found in the form of a raster or grid where each grid cell has an
-elevation value. Using DEM for flow routing requires specialized
-algorithms for preprocessing, routing and analysis that should be
-suitable for large grids considering the increasing resolution of DEMs
-collected today.
+- Efficient DEM processing with algorithms optimized for large grid
+  sizes.
+- Delineate watersheds (also referred to as drainage basins, catchments,
+  upslope areas, or contributing areas) for any location.
+- Perform stream and river delineation.
+- Accurately route water flows.
+- Handle operations in memory, avoiding repeated file writing when
+  delineating many watersheds
+- And so much more!
 
-This R-package provides the tools for processing DEMs. Code for the main
-algorithms are ported from the RichDEM library by Richard Barnes which
-has been implemented in this package using Rcpp. For more information
-and algorithms see the [RichDEM Python and C++
-libraries](https://github.com/r-barnes/richdem).
+## Background
 
-### DEM processing
+Water flow modeling using DEMs can be a complex process that requires
+specialized algorithms to preprocess, analyze, and interpret the data
+accurately. “flowdem” simplifies this process by providing you with an
+easy-to-use R package that incorporates advanced algorithms from the
+[RichDEM library](https://github.com/r-barnes/richdem) by Richard
+Barnes. Key algorithms are exposed to R using Rcpp for optimal
+performance.
 
-After processing the DEM, several useful things can be done including:
-delineation of a watershed (also termed drainage basin, catchment,
-upslope or contributing area) for any location, stream and river
-delineation, routing water flow, and much more. The pre-processing often
-involve steps that deal with depression and/or flat surfaces by either
-*filling* or *breaching* them to enable correct assessment of *flow
-directions*. Flow directions are then used for watershed and stream
-delineation etc.
+## DEM Processing
 
-### Example useage
+After pre-processing your DEM, you can unleash its full potential by
+delineating watersheds and streams, routing water flows accurately, and
+performing other essential tasks. The pre-processing steps include
+dealing with depressions or flat surfaces through *filling* or
+*breaching*, enabling correct assessment of flow directions for further
+analysis.
 
-The library uses the [‘terra’
-R-package](https://github.com/rspatial/terra) for managing raster data.
-If you encounter any issues, first try to update ‘terra’.
+## Example Usage
 
-Here, a sample DEM from Denmark (100 m resolution) included in the
-package is used to showcase functions of the library:
+The “flowdem” package works seamlessly with the [“terra”
+R-package](https://github.com/rspatial/terra) to manage raster data. If
+you encounter any issues, make sure your “terra” package is up-to-date
+before reaching out for assistance.
+
+Here”s a quick sample of how “flowdem” can transform your DEM analysis.
+The sample data, a DEM (100 m resolution) from northern Zealand,
+Denmark, is included in the package.
 
 ``` r
 library(flowdem);library(terra)
@@ -58,30 +73,34 @@ plot(dem)
 
 ![](https://github.com/KennethTM/flowdem/blob/main/man/figures/arre_dem.png)
 
-Determining flow directions requires a DEM without depression and pits.
-Filling and/or breaching can be used to pre-process the DEM:
+To accurately determine flow directions, it”s essential to use a DEM
+free of depressions and pits. Pre-processing techniques like filling or
+breaching can help achieve this:
 
 ``` r
 #Fill DEM and leave surfaces flat
 dem_fill <- fill(dem, epsilon = FALSE)
 
 #Fill DEM and apply a gradient on flat surfaces to ensure flow
-#Note: When writing DEMs filled with epsilon to file, set the datatype to FLT8S in terra::writeRaster()
+#Note: When writing DEMs filled with epsilon to file, 
+#set the datatype to FLT8S in terra::writeRaster()
 dem_fill_eps <- fill(dem, epsilon = TRUE)
 
 #Fill DEM and delineate coastal drainage basins simultaneously
 dem_fill_basins <- fill_basins(dem)
 
-#Breach DEM, that is, resolve depression by 'carving' through obstacles
+#Breach DEM, that is, resolve depression by "carving" through obstacles
 dem_breach <- breach(dem)
 
 #Use fill with epsilon on breached DEM to resolve flats and ensure drainage
 dem_breach_fill_eps <- fill(dem_breach, epsilon = TRUE)
 ```
 
-The filling and breaching operations affects the DEM very differently as
-shown here where differences between the raw DEM and the filled and
-breached DEMs in a small sub-region:
+As demonstrated in this section, the filling and breaching processes
+have a significantly different impact on the Digital Elevation Model
+(DEM) compared to the raw DEM. To further illustrate this point, we
+analyze the differences between the original DEM and the modified
+versions.
 
 ``` r
 dem_breach_diff <- dem - dem_breach
@@ -97,8 +116,11 @@ plot(dem_fill_diff, main = "Impact of filling", col=hcl.colors(50, rev = TRUE))
 
 ![](https://github.com/KennethTM/flowdem/blob/main/man/figures/arre_diff.png)
 
-After filling and/or breaching and resolving flats on the DEM, flow
-directions can be calculated and used to delineate flow paths:
+To improve accuracy in your topographical analysis, properly fill or
+breach any sinks and depressions on the DEM. Additionally, process flats
+using `epsilon = TRUE` to ensure proper flow direction determination.
+Once completed, this information can then be used to effectively outline
+the pathways taken by the flowing water.
 
 ``` r
 #Get flow directions using the filled DEM
@@ -114,12 +136,13 @@ dem_streams <- dem_acc > 100
 plot(dem_streams, col=c("grey", "dodgerblue"), legend=FALSE)
 ```
 
-The flow directions are based on the ‘d8’ routing scheme which is the
-only mode supported now. Using the flow direction grid to delineate
-watersheds are useful for many applications. This can be done by
-supplying a target area in the form of raster or data in a spatial
-vector format through the ‘sp’ or ‘sf’ packages. In this example the
-watershed for the largest lake in Denmark (Lake Arre) is delineated:
+The flow directions are based on the “d8” routing scheme, which is
+currently the only mode available. Utilizing the flow direction grid can
+help with watershed delineation for various applications. You can
+achieve this by providing a target area in either raster or vector
+format from the “terra” package or vector format from the “sf” package.
+In this example, we will demonstrate how to delineate the watershed for
+Denmark’s largest lake (Lake Arre).:
 
 ``` r
 #Read the vector data using terra of sf packages
@@ -143,11 +166,12 @@ plot(lake, col="coral", add=TRUE, border="coral")
 
 ![](https://github.com/KennethTM/flowdem/blob/main/man/figures/arre_watershed.png)
 
-The library support watershed delineation to a target point, line or
-polygon used in the ‘terra’ or ‘sf’ packages. A raster can also be
-supplied. Furthermore, the library supports delineation of nested
-watersheds where each watershed is assigned a unique id.
+The library provides support for creating watershed delineations
+targeting points, lines or polygons in terra” or “sf” packages. It also
+supports the use of rasters in “terra”. Additionally, this library
+allows for nested watershed delineation with each watershed assigned a
+unique ID.
 
-### Contributors
+## Contributors
 
 [Cyril Mory](https://github.com/cyrilmory)
