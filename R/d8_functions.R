@@ -83,13 +83,14 @@ accum <- function(dirs, mode = "d8"){
   
 }
 
+
 #' Delineate watersheds
 #' 
-#' Delineate watersheds (equivalent terms: catchment area, upslope area, contributing area, basin) from a flow direction raster and target area given as vector or raster object.
+#' Delineate watersheds (equivalent terms: catchment area, upslope area, contributing area, basin) from a flow direction raster and target area given as vector or raster object. For rasters, all non-NA cells are used as pour points.
 #' 
 #' @md
 #' @param dirs terra::SpatRaster object containing d8 flow direction.
-#' @param target terra::SpatRaster, Spatial* or sf object.
+#' @param target terra::SpatRaster, terra::SpatVector or sf::sf object.
 #' @param nested TRUE or FALSE (default). Indicates whether the output watersheds should be nested (a watershed for each pour-point).
 #' @param mode Only 'd8' supported for now.
 #' @return watershed terra::SpatRaster object delineated watershed.
@@ -101,8 +102,8 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
     stop("Input must be a SpatRaster object from the terra package")
   }
 
-  if(!any(inherits(target, "SpatRaster"), !inherits(target, "sf"), !inherits(target, "Spatial"))){
-    stop("target must be a SpatRaster, Spatial* or sf object")
+  if(!any(inherits(target, "SpatRaster"), !inherits(target, "sf"), !inherits(target, "SpatVector"))){
+    stop("Target must be a SpatRaster, SpatVector or sf object")
   }
 
   if(mode != "d8"){
@@ -123,9 +124,13 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
           876")
   }
   
-  if(inherits(target, "sf") | inherits(target, "Spatial")){
+  if(inherits(target, "sf") | inherits(target, "SpatVector")){
+    
+    if(inherits(target, "sf")){
+      target <- terra::vect(target)
+    }
 
-    cell_df <- terra::extract(dirs, terra::vect(target), cells=TRUE, df = TRUE)
+    cell_df <- terra::extract(dirs, target, cells=TRUE, df = TRUE)
     target_xy <- terra::rowColFromCell(dirs, cell_df$cell)
     target_xy <- cbind(target_xy, cell_df$ID)
 
@@ -135,9 +140,9 @@ watershed <- function(dirs, target, nested = FALSE, mode = "d8"){
       stop("Input dirs and target SpatRasters must have the same geometry")
     }
     
-    target_cells <- which(!is.na(target[]))
+    target_cells <- which(!is.na(terra::values(target)))
     target_xy <- terra::rowColFromCell(dirs, target_cells)
-    target_xy <- cbind(target_xy, target[target_cells])
+    target_xy <- as.matrix(cbind(target_xy, target[target_cells]))
     
   }else{
     stop("Something went wrong")
