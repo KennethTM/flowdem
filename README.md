@@ -136,6 +136,8 @@ dem_streams <- dem_acc > 100
 plot(dem_streams, col=c("grey", "dodgerblue"), legend=FALSE)
 ```
 
+![](https://github.com/KennethTM/flowdem/blob/main/man/figures/arre_streams.png)
+
 The flow directions are based on the “d8” routing scheme, which is
 currently the only mode available. Utilizing the flow direction grid can
 help with watershed delineation for various applications. You can
