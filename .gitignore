@@ -5,3 +5,4 @@
 flowdem.Rproj
 man/
 *.dll
+*so
