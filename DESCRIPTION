@@ -6,7 +6,7 @@ Date: 2023-01-12
 Author: Kenneth Thorø Martinsen
 Maintainer: Kenneth Thorø Martinsen <kenneth2810@gmail.com>
 Description: Contains algorithms and functions involved in flow routing on digital elevation models.
-License: GPL (>= 2)
+License: MIT
 Encoding: UTF-8
 Imports: Rcpp (>= 1.0.6), terra
 LinkingTo: Rcpp
